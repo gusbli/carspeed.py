@@ -8,6 +8,9 @@ import math
 import datetime
 import cv2
 
+METER_PER_SEC_TO_KM_PER_HOUR = 3.6
+METER_PER_SEC_TO_MILES_PER_HOUR = 0.681818
+
 # place a prompt on the displayed image
 def prompt_on_image(txt):
     global image
@@ -17,7 +20,7 @@ def prompt_on_image(txt):
 # calculate speed from pixels and time
 def get_speed(pixels, ftperpixel, secs):
     if secs > 0.0:
-        return ((pixels * ftperpixel)/ secs) * 0.681818  
+        return ((pixels * ftperpixel)/ secs) * METER_PER_SEC_TO_MILES_PER_HOUR #METER_PER_SEC_TO_KM_PER_HOUR
     else:
         return 0.0
  
@@ -55,7 +58,7 @@ def draw_rectangle(event,x,y,flags,param):
         cv2.rectangle(image,(ix,iy),(fx,fy),(0,255,0),2)
         
 # define some constants
-DISTANCE = 76  #<---- enter your distance-to-road value here
+DISTANCE = 10  #<---- enter your distance-to-road value here
 MIN_SPEED = 0  #<---- enter the minimum speed for saving images
 SAVE_CSV = False  #<---- record the results in .csv format in carspeed_(date).csv
 
@@ -81,7 +84,7 @@ RIGHT_TO_LEFT = 2
 # calculate the the width of the image at the distance specified
 frame_width_ft = 2*(math.tan(math.radians(FOV*0.5))*DISTANCE)
 ftperpixel = frame_width_ft / float(IMAGEWIDTH)
-print("Image width in feet {} at {} from camera".format("%.0f" % frame_width_ft,"%.0f" % DISTANCE))
+print("Image width in meters is {} m at {} m from camera".format("%.0f" % frame_width_ft,"%.0f" % DISTANCE))
 
 # state maintains the state of the speed computation process
 # if starts as WAITING
