@@ -60,8 +60,10 @@ METER_PER_FOOT = 1/FEET_PER_METER
 MPH_PER_KMH = 0.6214
 KMH_PER_MPH = 1/MPH_PER_KMH
 
-DISTANCE = 27  #<---- enter your distance-to-road value here FEET
-MIN_SPEED = 15  #<---- enter the minimum speed for saving images MPH
+DISTANCE_M = 8.2
+DISTANCE = DISTANCE_M*FEET_PER_METER  #<---- enter your distance-to-road value here FEET
+MIN_SPEED_KMH = 10
+MIN_SPEED = MIN_SPEED_KMH*MPH_PER_KMH  #<---- enter the minimum speed for saving images MPH
 SAVE_CSV = True  #<---- record the results in .csv format in carspeed_(date).csv
 
 THRESHOLD = 15
@@ -87,9 +89,8 @@ RIGHT_TO_LEFT = 2
 frame_width_ft = 2*(math.tan(math.radians(FOV*0.5))*DISTANCE)
 ftperpixel = frame_width_ft / float(IMAGEWIDTH)
 frame_width_m = frame_width_ft*METER_PER_FOOT
-distance_m = DISTANCE*METER_PER_FOOT
-print("Image width in feet   {} at {} from camera".format("%.0f" % frame_width_ft,"%.0f" % DISTANCE))
-print("Image width in meters {} at {} from camera".format("%.0f" % frame_width_m,"%.0f" % distance_m))
+print("Image width in feet   {} at {} ft from camera".format("%.1f" % frame_width_ft,"%.1f" % DISTANCE))
+print("Image width in meters {} at {} m from camera".format("%.1f" % frame_width_m,"%.1f" % DISTANCE_M))
 
 # state maintains the state of the speed computation process
 # if starts as WAITING
@@ -287,7 +288,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     direction = RIGHT_TO_LEFT
                     abs_chg = initial_x - x
                 mph = get_speed(abs_chg,ftperpixel,secs)
-                print("{0:4d}  {1:7.2f}  {2:7.0f}   {3:4d}  {4:4d}".format(abs_chg,secs,mph,x,w))
+                kmh = mph*KMH_PER_MPH
+                # print("{0:4d}  {1:7.2f}  {2:7.1f} mph   {3:4d}  {4:4d}".format(abs_chg,secs,mph,x,w))
+                print("{0:4d}  {1:7.2f}  {2:7.1f} kmh   {3:4d}  {4:4d}".format(abs_chg,secs,kmh,x,w))
                 real_y = upper_left_y + y
                 real_x = upper_left_x + x
                 # is front of object outside the monitired boundary? Then write date, time and speed on image
