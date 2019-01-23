@@ -299,8 +299,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                         or ((x+w >= monitored_width - 2) \
                         and (direction == LEFT_TO_RIGHT)):
                     if (last_mph > MIN_SPEED):    # save the image
-                        # timestamp the image
-                        cv2.putText(image, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                        # timestamp the image "tis 08 jan 2019 02:41:31" (AM/PM)
+                        #cv2.putText(image, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
+                        #    (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 1)
+                        
+                        # timestamp the image "2019-01-31 14:59:59 sö"
+                        cv2.putText(image, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %a"),
                             (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 1)
                         # write the speed: first get the size of the text
                         size, base = cv2.getTextSize( "%.0f mph" % last_mph, cv2.FONT_HERSHEY_SIMPLEX, 2, 3)
