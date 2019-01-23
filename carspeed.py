@@ -262,9 +262,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             last_x = x
             initial_time = timestamp
             last_mph = 0
+            last_kmh = 0
             text_on_image = 'Tracking'
             print(text_on_image)
-            print("x-chg    Secs      MPH  x-pos width")
+            #print("x-chg    Secs      MPH  x-pos width")
+            print("x-chg    Secs      KMH  x-pos width")
         else:
             # compute the lapsed time
             secs = secs_diff(timestamp,initial_time)
@@ -290,7 +292,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 mph = get_speed(abs_chg,ftperpixel,secs)
                 kmh = mph*KMH_PER_MPH
                 # print("{0:4d}  {1:7.2f}  {2:7.1f} mph   {3:4d}  {4:4d}".format(abs_chg,secs,mph,x,w))
-                print("{0:4d}  {1:7.2f}  {2:7.1f} kmh   {3:4d}  {4:4d}".format(abs_chg,secs,kmh,x,w))
+                print("{0:4d}  {1:7.2f}  {2:7.0f} kmh   {3:4d}  {4:4d}".format(abs_chg,secs,kmh,x,w))
                 real_y = upper_left_y + y
                 real_x = upper_left_x + x
                 # is front of object outside the monitired boundary? Then write date, time and speed on image
@@ -302,30 +304,45 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                         # timestamp the image "tis 08 jan 2019 02:41:31" (AM/PM)
                         #cv2.putText(image, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
                         #    (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 1)
-                        
                         # timestamp the image "2019-01-31 14:59:59 sö"
                         cv2.putText(image, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S %a"),
                             (10, image.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 1)
+                        
                         # write the speed: first get the size of the text
-                        size, base = cv2.getTextSize( "%.0f mph" % last_mph, cv2.FONT_HERSHEY_SIMPLEX, 2, 3)
+                        #size, base = cv2.getTextSize( "%.1f mph" % last_mph, cv2.FONT_HERSHEY_SIMPLEX, 2, 3)
+                        # then center it horizontally on the image
+                        #cntr_x = int((IMAGEWIDTH - size[0]) / 2) 
+                        #cv2.putText(image, "%.1f mph" % last_mph,
+                        #    (cntr_x , int(IMAGEHEIGHT * 0.2)), cv2.FONT_HERSHEY_SIMPLEX, 2.00, (0, 255, 0), 3)
+                        # write the speed: first get the size of the text
+                        
+                        size, base = cv2.getTextSize( "%02.0f kmh" % last_kmh, cv2.FONT_HERSHEY_SIMPLEX, 2, 3)
                         # then center it horizontally on the image
                         cntr_x = int((IMAGEWIDTH - size[0]) / 2) 
-                        cv2.putText(image, "%.0f mph" % last_mph,
+                        cv2.putText(image, "%02.0f kmh" % last_kmh,
                             (cntr_x , int(IMAGEHEIGHT * 0.2)), cv2.FONT_HERSHEY_SIMPLEX, 2.00, (0, 255, 0), 3)
-                        # and save the image to disk
-                        imageFilename = "car_at_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".jpg"
+                        
+
+                        # and save the image to disk, car_at_20190131_215959_37
+                        imageFilename = "car_at_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") +\
+                            "_%02.0f" % last_kmh + "kmh" +".jpg"
                         # use the following image file name if you want to be able to sort the images by speed
                         #imageFilename = "car_at_%02.0f" % last_mph + "_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".jpg"
                         
                         cv2.imwrite(imageFilename,image)
                         if SAVE_CSV:
                             cap_time = datetime.datetime.now()
-                            record_speed(cap_time.strftime("%Y.%m.%d")+','+cap_time.strftime('%A')+','+\
-                               cap_time.strftime('%H%M')+','+("%.0f" % last_mph) + ','+imageFilename)
+                            # 2019.01.31,söndag,2159,37,car_at_20180131_215959_37kmh.jpg
+                            #record_speed(cap_time.strftime("%Y.%m.%d")+','+cap_time.strftime('%A')+','+\
+                            #   cap_time.strftime('%H%M')+','+("%.0f" % last_mph) + ','+imageFilename)
+                            
+                            # 2019,01,31," ",21,59,59,sö,37
+                            record_speed(cap_time.strftime("%Y,%m,%d")+','+cap_time.strftime('%H,%M,%S')+','+cap_time.strftime('%a')+','+("%02.0f" % last_kmh) + ','+imageFilename)
                     state = SAVING
                 # if the object hasn't reached the end of the monitored area, just remember the speed 
                 # and its last position
                 last_mph = mph
+                last_kmh = last_mph*KMH_PER_MPH
                 last_x = x
     else:
         if state != WAITING:
