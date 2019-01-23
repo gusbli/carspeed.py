@@ -55,7 +55,12 @@ def draw_rectangle(event,x,y,flags,param):
         cv2.rectangle(image,(ix,iy),(fx,fy),(0,255,0),2)
         
 # define some constants
-DISTANCE = 30  #<---- enter your distance-to-road value here FEET
+FEET_PER_METER = 3.2808
+METER_PER_FOOT = 1/FEET_PER_METER
+MPH_PER_KMH = 0.6214
+KMH_PER_MPH = 1/MPH_PER_KMH
+
+DISTANCE = 27  #<---- enter your distance-to-road value here FEET
 MIN_SPEED = 15  #<---- enter the minimum speed for saving images MPH
 SAVE_CSV = True  #<---- record the results in .csv format in carspeed_(date).csv
 
@@ -81,7 +86,10 @@ RIGHT_TO_LEFT = 2
 # calculate the the width of the image at the distance specified
 frame_width_ft = 2*(math.tan(math.radians(FOV*0.5))*DISTANCE)
 ftperpixel = frame_width_ft / float(IMAGEWIDTH)
-print("Image width in feet {} at {} from camera".format("%.0f" % frame_width_ft,"%.0f" % DISTANCE))
+frame_width_m = frame_width_ft*METER_PER_FOOT
+distance_m = DISTANCE*METER_PER_FOOT
+print("Image width in feet   {} at {} from camera".format("%.0f" % frame_width_ft,"%.0f" % DISTANCE))
+print("Image width in meters {} at {} from camera".format("%.0f" % frame_width_m,"%.0f" % distance_m))
 
 # state maintains the state of the speed computation process
 # if starts as WAITING
